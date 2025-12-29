@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner PDA - Captura de Códigos de Barras</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Captura de Códigos de Barras</h1>
+            <p class="subtitle">Scanner PDA en Tiempo Real</p>
+        </div>
+
+        <div class="main-content">
+            <div class="scanner-section">
+                <div class="input-group">
+                    <label for="scannerInput">Entrada del Scanner:</label>
+                    <input 
+                        type="text" 
+                        id="scannerInput" 
+                        class="scanner-input" 
+                        placeholder="Posicione el scanner aquí o escanee un código..."
+                        readonly
+                    >
+                </div>
+
+                <div class="info-box">
+                    <h3>ℹ️ Información</h3>
+                    <p>El scanner emitirá el código de barras automáticamente. Presione el botón de escaneo en el PDA.</p>
+                </div>
+
+                <div class="last-scan">
+                    <h3>Último Escaneo</h3>
+                    <div class="scan-display" id="lastScan">
+                        <p class="empty-state">Esperando escaneo...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>Historial de Escaneos</h3>
+                    <button id="clearBtn" class="btn-secondary">Limpiar Historial</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <p class="empty-state">Sin escaneos aún</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Total de Escaneos:</span>
+                <span class="stat-value" id="totalScans">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Último Escaneo:</span>
+                <span class="stat-value" id="lastTime">--:--:--</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
