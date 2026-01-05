@@ -17,8 +17,13 @@ class ScannerManager {
     }
 
     init() {
-        // Event listeners
+        // Event listeners para el scanner
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        // Listener para cambios en el input (algunos scanners usan este evento)
+        this.scannerInput.addEventListener('input', (e) => this.handleInput(e));
+        // Listener para Enter en el input
+        this.scannerInput.addEventListener('keypress', (e) => this.handleKeyPress(e));
+        
         this.clearBtn.addEventListener('click', () => this.clearHistory());
         
         // Auto-focus en el input
@@ -77,6 +82,42 @@ class ScannerManager {
                     this.scannerInput.value = '';
                 }
             }, 200);
+        }
+    }
+
+    handleInput(event) {
+        // Este método maneja el evento 'input' que disparan algunos scanners
+        const value = this.scannerInput.value.trim();
+        
+        if (value && value.length > 0) {
+            // Detectar si termina con Enter o si tiene un patrón común de scanner
+            if (event.inputType === 'insertText' && event.data === '\n') {
+                // Scanner terminó con Enter
+                this.processScan(value.replace(/\n/, ''));
+                this.scannerInput.value = '';
+            } else if (value.length >= 6) {
+                // Si tiene al menos 6 caracteres, podría ser un código válido
+                // Esperar a ver si hay más entrada
+                clearTimeout(this.scanTimeout);
+                this.scanTimeout = setTimeout(() => {
+                    if (this.scannerInput.value.trim()) {
+                        this.processScan(this.scannerInput.value.trim());
+                        this.scannerInput.value = '';
+                    }
+                }, 150);
+            }
+        }
+    }
+
+    handleKeyPress(event) {
+        // Detectar Enter en el input del scanner
+        if (event.key === 'Enter' || event.code === 'Enter') {
+            event.preventDefault();
+            const value = this.scannerInput.value.trim();
+            if (value) {
+                this.processScan(value);
+            }
+            this.scannerInput.value = '';
         }
     }
 
