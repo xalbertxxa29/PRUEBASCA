@@ -8,6 +8,14 @@ class ScannerManager {
         this.totalScansSpan = document.getElementById('totalScans');
         this.lastTimeSpan = document.getElementById('lastTime');
         
+        // Panel de Debug
+        this.debugLog = document.getElementById('debugLog');
+        this.debugPanel = document.getElementById('debugPanel');
+        this.toggleDebugBtn = document.getElementById('toggleDebug');
+        this.clearDebugBtn = document.getElementById('clearDebug');
+        this.testScanBtn = document.getElementById('testScan');
+        this.isDebugCollapsed = false;
+        
         this.scanBuffer = '';
         this.lastKeyTime = 0;
         this.scanTimeout = null;
@@ -16,7 +24,37 @@ class ScannerManager {
         this.init();
     }
 
+    logDebug(message, type = 'info', data = null) {
+        const timestamp = new Date().toLocaleTimeString('es-ES');
+        const entry = document.createElement('div');
+        entry.className = `debug-entry ${type}`;
+        
+        let content = `[${timestamp}] ${message}`;
+        if (data) {
+            content += ` | ${JSON.stringify(data)}`;
+        }
+        
+        entry.textContent = content;
+        this.debugLog.appendChild(entry);
+        
+        // Auto-scroll al final
+        this.debugLog.parentElement.scrollTop = this.debugLog.parentElement.scrollHeight;
+        
+        // Limitar a 50 mensajes
+        const entries = this.debugLog.querySelectorAll('.debug-entry');
+        if (entries.length > 50) {
+            entries[0].remove();
+        }
+    }
+
     init() {
+        this.logDebug('🚀 Aplicación iniciada', 'success');
+        
+        // Configurar botones de debug
+        this.toggleDebugBtn.addEventListener('click', () => this.toggleDebug());
+        this.clearDebugBtn.addEventListener('click', () => this.clearDebugLog());
+        this.testScanBtn.addEventListener('click', () => this.simulateScan());
+        
         // Event listeners para el scanner
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
         // Listener para cambios en el input (algunos scanners usan este evento)
@@ -28,6 +66,7 @@ class ScannerManager {
         
         // Auto-focus en el input
         this.scannerInput.focus();
+        this.logDebug('Input del scanner enfocado', 'info');
         
         // Re-focus si se pierde
         document.addEventListener('click', () => {
@@ -36,12 +75,65 @@ class ScannerManager {
 
         // Cargar historial del localStorage
         this.loadHistory();
+        
+        // Logging de eventos globales
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key.length === 1) {
+                this.logDebug(`⌨️ Tecla presionada: "${e.key}"`, 'event', { 
+                    key: e.key, 
+                    code: e.code,
+                    keyCode: e.keyCode
+                });
+            }
+        });
+    }
+
+    toggleDebug() {
+        this.isDebugCollapsed = !this.isDebugCollapsed;
+        if (this.isDebugCollapsed) {
+            this.debugPanel.classList.add('collapsed');
+            this.toggleDebugBtn.textContent = 'Maximizar';
+        } else {
+            this.debugPanel.classList.remove('collapsed');
+            this.toggleDebugBtn.textContent = 'Minimizar';
+        }
+    }
+
+    clearDebugLog() {
+        this.debugLog.innerHTML = '<div class="debug-entry info">Log limpiado</div>';
+        this.logDebug('Log limpiado por el usuario', 'info');
+    }
+
+    simulateScan() {
+        const testCodes = ['1234567890123', '978-3-16-148410', 'SCAN-TEST-001', '5901234123457'];
+        const randomCode = testCodes[Math.floor(Math.random() * testCodes.length)];
+        
+        this.logDebug(`🧪 Simulando escaneo de prueba: ${randomCode}`, 'event');
+        
+        // Simular entrada de caracteres
+        for (let i = 0; i < randomCode.length; i++) {
+            setTimeout(() => {
+                this.scannerInput.value += randomCode[i];
+                this.logDebug(`Carácter ${i + 1}: "${randomCode[i]}"`, 'event');
+            }, i * 50);
+        }
+        
+        // Simular Enter al final
+        setTimeout(() => {
+            const event = new KeyboardEvent('keypress', {
+                key: 'Enter',
+                code: 'Enter',
+                keyCode: 13
+            });
+            this.scannerInput.dispatchEvent(event);
+        }, randomCode.length * 50);
     }
 
     handleKeyDown(event) {
         // Detectar tecla "Enter" como fin de escaneo
         if (event.key === 'Enter') {
             event.preventDefault();
+            this.logDebug('✓ Enter detectado en handleKeyDown', 'event');
             
             if (this.scanBuffer.trim()) {
                 this.processScan(this.scanBuffer.trim());
@@ -64,12 +156,14 @@ class ScannerManager {
             // Limpiar buffer si han pasado más de SCAN_TIMEOUT ms
             const now = Date.now();
             if (now - this.lastKeyTime > this.SCAN_TIMEOUT && this.scanBuffer) {
+                this.logDebug(`Buffer reset (pausa > ${this.SCAN_TIMEOUT}ms)`, 'event');
                 this.scanBuffer = '';
             }
             
             this.lastKeyTime = now;
             this.scanBuffer += event.key;
             this.scannerInput.value = this.scanBuffer;
+            this.logDebug(`Carácter acumulado: "${event.key}" | Buffer actual: "${this.scanBuffer}"`, 'event');
 
             // Limpiar timeout anterior
             clearTimeout(this.scanTimeout);
@@ -88,11 +182,13 @@ class ScannerManager {
     handleInput(event) {
         // Este método maneja el evento 'input' que disparan algunos scanners
         const value = this.scannerInput.value.trim();
+        this.logDebug(`📥 Evento input disparado | Valor: "${value}"`, 'event');
         
         if (value && value.length > 0) {
             // Detectar si termina con Enter o si tiene un patrón común de scanner
             if (event.inputType === 'insertText' && event.data === '\n') {
                 // Scanner terminó con Enter
+                this.logDebug(`✓ Detectado Enter en evento input`, 'event');
                 this.processScan(value.replace(/\n/, ''));
                 this.scannerInput.value = '';
             } else if (value.length >= 6) {
@@ -114,6 +210,7 @@ class ScannerManager {
         if (event.key === 'Enter' || event.code === 'Enter') {
             event.preventDefault();
             const value = this.scannerInput.value.trim();
+            this.logDebug(`⏎ Evento keypress con Enter detectado | Valor: "${value}"`, 'event');
             if (value) {
                 this.processScan(value);
             }
@@ -122,6 +219,8 @@ class ScannerManager {
     }
 
     processScan(code) {
+        this.logDebug(`✅ ESCANEO PROCESADO: "${code}"`, 'scan');
+        
         const now = new Date();
         const scan = {
             code: code,

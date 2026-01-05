@@ -60,6 +60,23 @@
                 <span class="stat-value" id="lastTime">--:--:--</span>
             </div>
         </div>
+
+        <!-- Panel de Debug -->
+        <div class="debug-panel">
+            <div class="debug-header">
+                <h3>🔧 Panel de Diagnóstico</h3>
+                <div class="debug-buttons">
+                    <button id="toggleDebug" class="debug-btn">Minimizar</button>
+                    <button id="clearDebug" class="debug-btn">Limpiar Log</button>
+                    <button id="testScan" class="debug-btn test-btn">Prueba de Scanner</button>
+                </div>
+            </div>
+            <div class="debug-content" id="debugPanel">
+                <div class="debug-log" id="debugLog">
+                    <div class="debug-entry info">Sistema iniciado - Esperando eventos...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
