@@ -79,23 +79,23 @@ Para que el scanner funcione en la web, debes configurar:
 Abre tu web en el navegador del UROVO DT50
 ```
 
-### Paso 2: Presiona "Abrir Scanner"
+### Paso 2: Presiona "Preparar Scanner"
 ```
 Verás en el Panel de Diagnóstico:
-- ✓ API ScanManager detectada
-- ✓ Scanner abierto exitosamente
-- O ⚠️ Sin API (requiere Keyboard Emulation)
+- ✓ Qué APIs están disponibles
+- ✓ Sistema LISTO para escanear
+- 👉 Instrucción para presionar botón del scanner
 ```
 
 ### Paso 3: Presiona Botón de Scanner
 ```
-Si está en modo Keyboard Emulation:
+El cuadro de entrada estará enfocado y listo para recibir datos.
+Presiona el botón de scanner físico del UROVO DT50.
+
+Si está configurado correctamente:
 - Aparecerá el código en el input
 - Se procesará automáticamente
-
-Si no está configurado:
-- No pasará nada
-- Verás eventos en el Panel de Diagnóstico
+- Verás el escaneo en el Panel de Diagnóstico
 ```
 
 ## 📊 Panel de Diagnóstico

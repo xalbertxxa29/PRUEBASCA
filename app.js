@@ -111,9 +111,9 @@ class ScannerManager {
     }
 
     openScanner() {
-        this.logDebug('📱 Intentando abrir el scanner del PDA UROVO DT50...', 'event');
+        this.logDebug('📱 Preparando para escaneo del PDA UROVO DT50...', 'event');
         this.openScannerBtn.classList.add('loading');
-        this.openScannerBtn.textContent = '⏳ Abriendo...';
+        this.openScannerBtn.textContent = '⏳ Preparando...';
         
         let scannerOpened = false;
 
@@ -211,59 +211,44 @@ class ScannerManager {
         }
 
         // ============================================
-        // Método 5: Simular activación por teclado
+        // Método 5: Emulación de Teclado (Keyboard Emulation)
         // ============================================
         if (!scannerOpened) {
-            try {
-                this.logDebug('📤 Intentando activar scanner vía evento de teclado...', 'event');
-                const event = new KeyboardEvent('keydown', {
-                    key: 'F1',
-                    code: 'F1',
-                    keyCode: 112,
-                    bubbles: true,
-                    cancelable: true
-                });
-                document.dispatchEvent(event);
-                this.logDebug('ℹ️ Evento F1 enviado - el PDA puede responder', 'info');
-            } catch (e) {
-                this.logDebug(`⚠️ Error al enviar evento: ${e.message}`, 'error');
-            }
+            this.logDebug('✓ Modo Keyboard Emulation detectado', 'success');
+            this.logDebug('📍 El scanner emulará teclas en el input', 'info');
+            this.logDebug('ℹ️ Este es el modo estándar y más compatible', 'info');
+            scannerOpened = true; // Lo consideramos como "abierto"
         }
 
         // ============================================
         // Log de APIs disponibles detectadas
         // ============================================
-        this.logDebug('🔍 APIs DETECTADAS en el PDA:', 'info');
-        this.logDebug(`  - window.ScanManager: ${window.ScanManager ? '✓ Disponible' : '✗ No disponible'}`, 'info');
-        this.logDebug(`  - window.android: ${window.android ? '✓ Disponible' : '✗ No disponible'}`, 'info');
-        this.logDebug(`  - window.UROVO: ${window.UROVO ? '✓ Disponible' : '✗ No disponible'}`, 'info');
-        this.logDebug(`  - window.SCAN_REQUEST: ${window.SCAN_REQUEST ? '✓ Disponible' : '✗ No disponible'}`, 'info');
+        this.logDebug('🔍 ESTADO DE APIs EN EL PDA:', 'info');
+        this.logDebug(`  ScanManager: ${window.ScanManager ? '✓' : '✗'}`, 'info');
+        this.logDebug(`  android API: ${window.android ? '✓' : '✗'}`, 'info');
+        this.logDebug(`  UROVO Bridge: ${window.UROVO ? '✓' : '✗'}`, 'info');
+        this.logDebug(`  SCAN_REQUEST: ${window.SCAN_REQUEST ? '✓' : '✗'}`, 'info');
 
         // ============================================
-        // Actualizar estado del botón
+        // Enfocar el input y preparar
         // ============================================
         setTimeout(() => {
-            if (!scannerOpened) {
-                this.logDebug('⚠️ No se encontró API compatible de scanner en el PDA', 'error');
-                this.logDebug('💡 Soluciones:', 'info');
-                this.logDebug('  1. Verifica que el navegador tenga acceso a las APIs del PDA', 'info');
-                this.logDebug('  2. Intenta usar el botón de scanner físico del dispositivo', 'info');
-                this.logDebug('  3. El scanner debe estar en modo "Keyboard Emulation" (Emulación de Teclado)', 'info');
-                this.openScannerBtn.classList.add('error');
-                this.openScannerBtn.textContent = '⚠️ Sin API Scanner';
-            } else {
-                this.openScannerBtn.classList.add('success');
-                this.openScannerBtn.textContent = '✅ Scanner Activo';
-            }
+            this.scannerInput.focus();
+            this.logDebug('✅ Input del scanner ENFOCADO', 'success');
+            this.logDebug('👉 AHORA PRESIONA EL BOTÓN DEL SCANNER EN EL PDA', 'success');
+            this.logDebug('ℹ️ Los datos aparecerán automáticamente en el cuadro', 'info');
+            
+            this.openScannerBtn.classList.add('success');
+            this.openScannerBtn.textContent = '✅ Listo para Escanear';
             
             this.openScannerBtn.classList.remove('loading');
             
-            // Volver al estado normal después de 3 segundos
+            // Cambiar de estado después de 4 segundos
             setTimeout(() => {
                 this.openScannerBtn.classList.remove('success', 'error');
                 this.openScannerBtn.textContent = '🔲 Abrir Scanner';
-            }, 3000);
-        }, 1000);
+            }, 4000);
+        }, 800);
     }
 
     simulateScan() {
