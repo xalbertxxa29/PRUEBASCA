@@ -3,87 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scanner PDA - Captura de Códigos de Barras</title>
+    <title>Scanner PDA UROVO DT50</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📱 Captura de Códigos de Barras</h1>
-            <p class="subtitle">Scanner PDA en Tiempo Real</p>
+
+<div class="container">
+
+    <header class="header">
+        <h1>📱 Scanner PDA</h1>
+        <p>UROVO DT50 · Keyboard Wedge</p>
+    </header>
+
+    <section class="scanner-card">
+        <label for="scannerInput">Código Escaneado</label>
+
+        <div class="scanner-row">
+            <input
+                id="scannerInput"
+                type="text"
+                placeholder="Escanee el código…"
+                autocomplete="off"
+            >
+            <button id="focusBtn">📌 Enfocar</button>
         </div>
 
-        <div class="main-content">
-            <div class="scanner-section">
-                <div class="input-group">
-                    <label for="scannerInput">Entrada del Scanner:</label>
-                    <div class="scanner-input-wrapper">
-                        <input 
-                            type="text" 
-                            id="scannerInput" 
-                            class="scanner-input" 
-                            placeholder="Posicione el scanner aquí o escanee un código..."
-                            autocomplete="off"
-                        >
-                        <button id="openScannerBtn" class="btn-scanner" title="Haz clic para enfocar y presiona el botón de scanner del PDA">
-                            🔲 Preparar Scanner
-                        </button>
-                    </div>
-                </div>
-
-                <div class="info-box">
-                    <h3>ℹ️ Información</h3>
-                    <p>El scanner emitirá el código de barras automáticamente. Presione el botón de escaneo en el PDA.</p>
-                </div>
-
-                <div class="last-scan">
-                    <h3>Último Escaneo</h3>
-                    <div class="scan-display" id="lastScan">
-                        <p class="empty-state">Esperando escaneo...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="history-section">
-                <div class="history-header">
-                    <h3>Historial de Escaneos</h3>
-                    <button id="clearBtn" class="btn-secondary">Limpiar Historial</button>
-                </div>
-                <div class="history-list" id="historyList">
-                    <p class="empty-state">Sin escaneos aún</p>
-                </div>
-            </div>
+        <div class="last-scan" id="lastScan">
+            Esperando escaneo…
         </div>
+    </section>
 
-        <div class="stats">
-            <div class="stat-item">
-                <span class="stat-label">Total de Escaneos:</span>
-                <span class="stat-value" id="totalScans">0</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Último Escaneo:</span>
-                <span class="stat-value" id="lastTime">--:--:--</span>
-            </div>
+    <section class="history-card">
+        <div class="history-header">
+            <h2>Historial</h2>
+            <button id="clearBtn">Limpiar</button>
         </div>
+        <div id="historyList" class="history-list"></div>
+    </section>
 
-        <!-- Panel de Debug -->
-        <div class="debug-panel">
-            <div class="debug-header">
-                <h3>🔧 Panel de Diagnóstico</h3>
-                <div class="debug-buttons">
-                    <button id="toggleDebug" class="debug-btn">Minimizar</button>
-                    <button id="clearDebug" class="debug-btn">Limpiar Log</button>
-                    <button id="testScan" class="debug-btn test-btn">Prueba de Scanner</button>
-                </div>
-            </div>
-            <div class="debug-content" id="debugPanel">
-                <div class="debug-log" id="debugLog">
-                    <div class="debug-entry info">Sistema iniciado - Esperando eventos...</div>
-                </div>
-            </div>
+    <section class="stats">
+        <div>
+            <span>Total</span>
+            <strong id="totalScans">0</strong>
         </div>
-    </div>
+        <div>
+            <span>Último</span>
+            <strong id="lastTime">--:--:--</strong>
+        </div>
+    </section>
 
-    <script src="app.js"></script>
+    <section class="debug-panel">
+        <h3>🔧 Panel de Diagnóstico</h3>
+        <div class="debug-log" id="debugLog"></div>
+    </section>
+
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
