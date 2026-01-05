@@ -8,6 +8,9 @@ class ScannerManager {
         this.totalScansSpan = document.getElementById('totalScans');
         this.lastTimeSpan = document.getElementById('lastTime');
         
+        // Botón de Scanner
+        this.openScannerBtn = document.getElementById('openScannerBtn');
+        
         // Panel de Debug
         this.debugLog = document.getElementById('debugLog');
         this.debugPanel = document.getElementById('debugPanel');
@@ -54,6 +57,9 @@ class ScannerManager {
         this.toggleDebugBtn.addEventListener('click', () => this.toggleDebug());
         this.clearDebugBtn.addEventListener('click', () => this.clearDebugLog());
         this.testScanBtn.addEventListener('click', () => this.simulateScan());
+        
+        // Configurar botón de abrir scanner
+        this.openScannerBtn.addEventListener('click', () => this.openScanner());
         
         // Event listeners para el scanner
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
@@ -102,6 +108,100 @@ class ScannerManager {
     clearDebugLog() {
         this.debugLog.innerHTML = '<div class="debug-entry info">Log limpiado</div>';
         this.logDebug('Log limpiado por el usuario', 'info');
+    }
+
+    openScanner() {
+        this.logDebug('📱 Intentando abrir el scanner del PDA...', 'event');
+        this.openScannerBtn.classList.add('loading');
+        this.openScannerBtn.textContent = '⏳ Abriendo...';
+        
+        // Intentar múltiples métodos para activar el scanner
+        let scannerOpened = false;
+
+        // Método 1: API específica de UROVO (si está disponible)
+        if (window.ScnMgr) {
+            try {
+                this.logDebug('✓ API ScnMgr detectada (UROVO específico)', 'info');
+                window.ScnMgr.startScan();
+                this.logDebug('✅ Scanner abierto vía ScnMgr', 'success');
+                scannerOpened = true;
+            } catch (e) {
+                this.logDebug(`⚠️ Error en ScnMgr: ${e.message}`, 'error');
+            }
+        }
+
+        // Método 2: API genérica de scanner (HTML5)
+        if (!scannerOpened && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            try {
+                this.logDebug('✓ API mediaDevices detectada', 'info');
+                this.logDebug('Nota: Se puede usar para acceso a cámara como scanner', 'info');
+            } catch (e) {
+                this.logDebug(`⚠️ Error en mediaDevices: ${e.message}`, 'error');
+            }
+        }
+
+        // Método 3: Simular activación por teclado (presionar tecla de scanner)
+        if (!scannerOpened) {
+            try {
+                this.logDebug('📤 Enviando evento de activación de scanner vía teclado', 'event');
+                // Algunos scanners responden a teclas especiales
+                const event = new KeyboardEvent('keydown', {
+                    key: 'F1',
+                    code: 'F1',
+                    keyCode: 112,
+                    bubbles: true
+                });
+                document.dispatchEvent(event);
+                this.logDebug('✓ Evento de teclado enviado', 'event');
+            } catch (e) {
+                this.logDebug(`⚠️ Error al enviar evento: ${e.message}`, 'error');
+            }
+        }
+
+        // Método 4: Intentar acceder a APIs específicas del navegador
+        if (window.cordova) {
+            try {
+                this.logDebug('✓ API Cordova detectada', 'info');
+                // Si está disponible, intentar abrir scanner vía Cordova
+                if (window.cordova.plugins && window.cordova.plugins.barcodeScanner) {
+                    this.logDebug('✓ Barcode Scanner Plugin disponible', 'success');
+                    window.cordova.plugins.barcodeScanner.scan(
+                        (result) => {
+                            this.logDebug(`✅ Escaneo completado: ${result.text}`, 'scan');
+                            this.scannerInput.value = result.text;
+                            this.handleKeyPress({ key: 'Enter', preventDefault: () => {} });
+                        },
+                        (error) => {
+                            this.logDebug(`❌ Error en escaneo: ${error}`, 'error');
+                        }
+                    );
+                    scannerOpened = true;
+                }
+            } catch (e) {
+                this.logDebug(`⚠️ Error en Cordova: ${e.message}`, 'error');
+            }
+        }
+
+        // Log final
+        setTimeout(() => {
+            if (!scannerOpened) {
+                this.logDebug('⚠️ No se encontró API compatible de scanner', 'error');
+                this.logDebug('💡 El scanner del PDA debe estar configurado en modo "Emulación de Teclado"', 'info');
+                this.openScannerBtn.classList.add('error');
+                this.openScannerBtn.textContent = '❌ No disponible';
+            } else {
+                this.openScannerBtn.classList.add('success');
+                this.openScannerBtn.textContent = '✅ Scanner Abierto';
+            }
+            
+            this.openScannerBtn.classList.remove('loading');
+            
+            // Volver al estado normal después de 3 segundos
+            setTimeout(() => {
+                this.openScannerBtn.classList.remove('success', 'error');
+                this.openScannerBtn.textContent = '🔲 Abrir Scanner';
+            }, 3000);
+        }, 500);
     }
 
     simulateScan() {

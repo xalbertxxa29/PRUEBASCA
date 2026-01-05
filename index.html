@@ -17,13 +17,18 @@
             <div class="scanner-section">
                 <div class="input-group">
                     <label for="scannerInput">Entrada del Scanner:</label>
-                    <input 
-                        type="text" 
-                        id="scannerInput" 
-                        class="scanner-input" 
-                        placeholder="Posicione el scanner aquí o escanee un código..."
-                        autocomplete="off"
-                    >
+                    <div class="scanner-input-wrapper">
+                        <input 
+                            type="text" 
+                            id="scannerInput" 
+                            class="scanner-input" 
+                            placeholder="Posicione el scanner aquí o escanee un código..."
+                            autocomplete="off"
+                        >
+                        <button id="openScannerBtn" class="btn-scanner" title="Abrir scanner del PDA">
+                            🔲 Abrir Scanner
+                        </button>
+                    </div>
                 </div>
 
                 <div class="info-box">
