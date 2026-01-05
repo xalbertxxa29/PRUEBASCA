@@ -111,87 +111,149 @@ class ScannerManager {
     }
 
     openScanner() {
-        this.logDebug('📱 Intentando abrir el scanner del PDA...', 'event');
+        this.logDebug('📱 Intentando abrir el scanner del PDA UROVO DT50...', 'event');
         this.openScannerBtn.classList.add('loading');
         this.openScannerBtn.textContent = '⏳ Abriendo...';
         
-        // Intentar múltiples métodos para activar el scanner
         let scannerOpened = false;
 
-        // Método 1: API específica de UROVO (si está disponible)
-        if (window.ScnMgr) {
+        // ============================================
+        // Método 1: API UROVO ScanManager (Recomendado)
+        // ============================================
+        if (window.ScanManager) {
             try {
-                this.logDebug('✓ API ScnMgr detectada (UROVO específico)', 'info');
-                window.ScnMgr.startScan();
-                this.logDebug('✅ Scanner abierto vía ScnMgr', 'success');
+                this.logDebug('✓ API ScanManager de UROVO detectada', 'success');
+                this.logDebug('📤 Iniciando escaneo vía ScanManager...', 'event');
+                
+                // Crear callback para cuando se complete el escaneo
+                const self = this;
+                window.ScanManager.startScan((result) => {
+                    if (result && result.barcode) {
+                        const code = result.barcode;
+                        this.logDebug(`✅ ESCANEO EXITOSO: "${code}"`, 'scan');
+                        this.scannerInput.value = code;
+                        this.scannerInput.focus();
+                        // Simular Enter para procesar
+                        this.handleKeyPress({ key: 'Enter', code: 'Enter', preventDefault: () => {} });
+                    } else {
+                        this.logDebug('⚠️ Escaneo cancelado por el usuario', 'event');
+                    }
+                }, (error) => {
+                    this.logDebug(`❌ Error en ScanManager: ${error}`, 'error');
+                });
+                
+                this.logDebug('✅ Scanner abierto vía ScanManager', 'success');
                 scannerOpened = true;
             } catch (e) {
-                this.logDebug(`⚠️ Error en ScnMgr: ${e.message}`, 'error');
+                this.logDebug(`⚠️ Error en ScanManager: ${e.message}`, 'error');
             }
         }
 
-        // Método 2: API genérica de scanner (HTML5)
-        if (!scannerOpened && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // ============================================
+        // Método 2: Barcode Scanner Intent (Android)
+        // ============================================
+        if (!scannerOpened && window.android && window.android.intentStartScan) {
             try {
-                this.logDebug('✓ API mediaDevices detectada', 'info');
-                this.logDebug('Nota: Se puede usar para acceso a cámara como scanner', 'info');
+                this.logDebug('✓ API Android Intent detectada', 'info');
+                this.logDebug('📤 Iniciando Intent de scanner...', 'event');
+                
+                window.android.intentStartScan((code) => {
+                    this.logDebug(`✅ ESCANEO EXITOSO: "${code}"`, 'scan');
+                    this.scannerInput.value = code;
+                    this.handleKeyPress({ key: 'Enter', preventDefault: () => {} });
+                });
+                
+                this.logDebug('✅ Scanner abierto vía Intent', 'success');
+                scannerOpened = true;
             } catch (e) {
-                this.logDebug(`⚠️ Error en mediaDevices: ${e.message}`, 'error');
+                this.logDebug(`⚠️ Error en Intent: ${e.message}`, 'error');
             }
         }
 
-        // Método 3: Simular activación por teclado (presionar tecla de scanner)
+        // ============================================
+        // Método 3: JavascriptInterface Bridge (WebView)
+        // ============================================
+        if (!scannerOpened && window.UROVO && window.UROVO.Scanner) {
+            try {
+                this.logDebug('✓ API UROVO Bridge detectada', 'info');
+                this.logDebug('📤 Iniciando scanner vía Bridge...', 'event');
+                
+                window.UROVO.Scanner.open((result) => {
+                    this.logDebug(`✅ ESCANEO EXITOSO: "${result}"`, 'scan');
+                    this.scannerInput.value = result;
+                    this.handleKeyPress({ key: 'Enter', preventDefault: () => {} });
+                });
+                
+                this.logDebug('✅ Scanner abierto vía UROVO Bridge', 'success');
+                scannerOpened = true;
+            } catch (e) {
+                this.logDebug(`⚠️ Error en UROVO Bridge: ${e.message}`, 'error');
+            }
+        }
+
+        // ============================================
+        // Método 4: Intent de Barcode Scanner genérico
+        // ============================================
+        if (!scannerOpened && window.SCAN_REQUEST) {
+            try {
+                this.logDebug('✓ API SCAN_REQUEST detectada', 'info');
+                window.SCAN_REQUEST((code) => {
+                    this.logDebug(`✅ ESCANEO EXITOSO: "${code}"`, 'scan');
+                    this.scannerInput.value = code;
+                    this.handleKeyPress({ key: 'Enter', preventDefault: () => {} });
+                });
+                
+                this.logDebug('✅ Scanner abierto vía SCAN_REQUEST', 'success');
+                scannerOpened = true;
+            } catch (e) {
+                this.logDebug(`⚠️ Error en SCAN_REQUEST: ${e.message}`, 'error');
+            }
+        }
+
+        // ============================================
+        // Método 5: Simular activación por teclado
+        // ============================================
         if (!scannerOpened) {
             try {
-                this.logDebug('📤 Enviando evento de activación de scanner vía teclado', 'event');
-                // Algunos scanners responden a teclas especiales
+                this.logDebug('📤 Intentando activar scanner vía evento de teclado...', 'event');
                 const event = new KeyboardEvent('keydown', {
                     key: 'F1',
                     code: 'F1',
                     keyCode: 112,
-                    bubbles: true
+                    bubbles: true,
+                    cancelable: true
                 });
                 document.dispatchEvent(event);
-                this.logDebug('✓ Evento de teclado enviado', 'event');
+                this.logDebug('ℹ️ Evento F1 enviado - el PDA puede responder', 'info');
             } catch (e) {
                 this.logDebug(`⚠️ Error al enviar evento: ${e.message}`, 'error');
             }
         }
 
-        // Método 4: Intentar acceder a APIs específicas del navegador
-        if (window.cordova) {
-            try {
-                this.logDebug('✓ API Cordova detectada', 'info');
-                // Si está disponible, intentar abrir scanner vía Cordova
-                if (window.cordova.plugins && window.cordova.plugins.barcodeScanner) {
-                    this.logDebug('✓ Barcode Scanner Plugin disponible', 'success');
-                    window.cordova.plugins.barcodeScanner.scan(
-                        (result) => {
-                            this.logDebug(`✅ Escaneo completado: ${result.text}`, 'scan');
-                            this.scannerInput.value = result.text;
-                            this.handleKeyPress({ key: 'Enter', preventDefault: () => {} });
-                        },
-                        (error) => {
-                            this.logDebug(`❌ Error en escaneo: ${error}`, 'error');
-                        }
-                    );
-                    scannerOpened = true;
-                }
-            } catch (e) {
-                this.logDebug(`⚠️ Error en Cordova: ${e.message}`, 'error');
-            }
-        }
+        // ============================================
+        // Log de APIs disponibles detectadas
+        // ============================================
+        this.logDebug('🔍 APIs DETECTADAS en el PDA:', 'info');
+        this.logDebug(`  - window.ScanManager: ${window.ScanManager ? '✓ Disponible' : '✗ No disponible'}`, 'info');
+        this.logDebug(`  - window.android: ${window.android ? '✓ Disponible' : '✗ No disponible'}`, 'info');
+        this.logDebug(`  - window.UROVO: ${window.UROVO ? '✓ Disponible' : '✗ No disponible'}`, 'info');
+        this.logDebug(`  - window.SCAN_REQUEST: ${window.SCAN_REQUEST ? '✓ Disponible' : '✗ No disponible'}`, 'info');
 
-        // Log final
+        // ============================================
+        // Actualizar estado del botón
+        // ============================================
         setTimeout(() => {
             if (!scannerOpened) {
-                this.logDebug('⚠️ No se encontró API compatible de scanner', 'error');
-                this.logDebug('💡 El scanner del PDA debe estar configurado en modo "Emulación de Teclado"', 'info');
+                this.logDebug('⚠️ No se encontró API compatible de scanner en el PDA', 'error');
+                this.logDebug('💡 Soluciones:', 'info');
+                this.logDebug('  1. Verifica que el navegador tenga acceso a las APIs del PDA', 'info');
+                this.logDebug('  2. Intenta usar el botón de scanner físico del dispositivo', 'info');
+                this.logDebug('  3. El scanner debe estar en modo "Keyboard Emulation" (Emulación de Teclado)', 'info');
                 this.openScannerBtn.classList.add('error');
-                this.openScannerBtn.textContent = '❌ No disponible';
+                this.openScannerBtn.textContent = '⚠️ Sin API Scanner';
             } else {
                 this.openScannerBtn.classList.add('success');
-                this.openScannerBtn.textContent = '✅ Scanner Abierto';
+                this.openScannerBtn.textContent = '✅ Scanner Activo';
             }
             
             this.openScannerBtn.classList.remove('loading');
@@ -201,7 +263,7 @@ class ScannerManager {
                 this.openScannerBtn.classList.remove('success', 'error');
                 this.openScannerBtn.textContent = '🔲 Abrir Scanner';
             }, 3000);
-        }, 500);
+        }, 1000);
     }
 
     simulateScan() {
